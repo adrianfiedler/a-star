@@ -1,12 +1,13 @@
-let rows = 5,
-  cols = 5,
+let rows = 25,
+  cols = 25,
   grid = [],
   openSet = [],
   closedSet = [],
   start,
   end,
   w,
-  h;
+  h,
+  path = [];
 
 class Spot {
   constructor(i, j) {
@@ -16,6 +17,7 @@ class Spot {
     this.g = 0;
     this.h = 0;
     this.neighbors = [];
+    this.previous = undefined;
   }
 
   show(colo) {
@@ -43,7 +45,7 @@ class Spot {
 }
 
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(800, 800);
   console.log("A*");
 
   w = width / cols;
@@ -81,9 +83,10 @@ function draw() {
       }
     }
 
-    let current = openSet[winner];
+    var current = openSet[winner];
 
     if (current === end) {
+      noLoop();
       console.log("DONE!");
     }
 
@@ -103,6 +106,10 @@ function draw() {
           neighbor.g = tempG;
           openSet.push(neighbor);
         }
+
+        neighbor.h = heuristic(neighbor, end);
+        neighbor.f = neighbor.g + neighbor.h;
+        neighbor.previous = current;
       }
       neighbor.g = current.g + 1;
     }
@@ -125,6 +132,24 @@ function draw() {
   for (let i = 0; i < openSet.length; i++) {
     openSet[i].show(color(0, 255, 0));
   }
+
+  // Find the path
+  path = [];
+  let temp = current;
+  path.push(temp);
+  while (temp.previous) {
+    path.push(temp.previous);
+    temp = temp.previous;
+  }
+  for (let i = 0; i < path.length; i++) {
+    path[i].show(color(0, 0, 255));
+  }
+}
+
+function heuristic(a, b) {
+  // let d = dist(a.i, a.j, b.i, b.j);
+  let d = abs(a.i - b.i) + abs(a.j - b.j);
+  return d;
 }
 
 function removeFromArray(arr, elt) {
