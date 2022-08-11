@@ -7,8 +7,7 @@ let rows = 25,
   end,
   w,
   h,
-  path = [],
-  noSolution = false;
+  path = [];
 
 class Spot {
   constructor(i, j) {
@@ -21,12 +20,12 @@ class Spot {
     this.previous = undefined;
     this.wall = false;
 
-    if (random(1) < 0.1) {
+    if (random(1) < 0.3) {
       this.wall = true;
     }
   }
 
-  show (colo) {
+  show(colo) {
     fill(colo);
     if (this.wall) {
       fill(0);
@@ -35,7 +34,7 @@ class Spot {
     rect(this.i * w, this.j * h, w - 1, h - 1);
   }
 
-  addNeighbors (grid) {
+  addNeighbors(grid) {
     let i = this.i;
     let j = this.j;
     if (i < cols - 1) {
@@ -50,11 +49,28 @@ class Spot {
     if (j > 0) {
       this.neighbors.push(grid[i][j - 1]);
     }
+    // top left
+    if (i > 0 && j > 0) {
+      this.neighbors.push(grid[i - 1][j - 1]);
+    }
+    // top right
+    if (i < cols - 1 && j > 0) {
+      this.neighbors.push(grid[i + 1][j - 1]);
+    }
+    // bottom left
+    if (i > 0 && j < rows - 1) {
+      this.neighbors.push(grid[i - 1][j + 1]);
+    }
+    // bottom right
+    if (i < cols - 1 && j < rows - 1) {
+      this.neighbors.push(grid[i + 1][j + 1]);
+    }
   }
 }
 
-function setup () {
+function setup() {
   createCanvas(800, 800);
+  // frameRate(1);
   console.log("A*");
 
   w = width / cols;
@@ -85,7 +101,7 @@ function setup () {
   console.log(grid);
 }
 
-function draw () {
+function draw() {
   if (openSet.length > 0) {
     let winner = 0;
     for (let i = 0; i < openSet.length; i++) {
@@ -127,9 +143,9 @@ function draw () {
     // we can keep going
   } else {
     // no solution
-    console.log('no solution');
-    noSolution = true;
+    console.log("no solution");
     noLoop();
+    return;
   }
 
   background(0);
@@ -148,14 +164,12 @@ function draw () {
   }
 
   // Find the path
-  if (!noSolution) {
-    path = [];
-    let temp = current;
-    path.push(temp);
-    while (temp.previous) {
-      path.push(temp.previous);
-      temp = temp.previous;
-    }
+  path = [];
+  let temp = current;
+  path.push(temp);
+  while (temp.previous) {
+    path.push(temp.previous);
+    temp = temp.previous;
   }
 
   for (let i = 0; i < path.length; i++) {
@@ -163,13 +177,13 @@ function draw () {
   }
 }
 
-function heuristic (a, b) {
-  // let d = dist(a.i, a.j, b.i, b.j);
-  let d = abs(a.i - b.i) + abs(a.j - b.j);
+function heuristic(a, b) {
+  // let d = dist(a.i, a.j, b.i, b.j); 
+  let d = abs(a.i - b.i) + abs(a.j - b.j); // manhattan distance
   return d;
 }
 
-function removeFromArray (arr, elt) {
+function removeFromArray(arr, elt) {
   for (let i = arr.length - 1; i >= 0; i--) {
     if (arr[i] == elt) {
       arr.splice(i, 1);
