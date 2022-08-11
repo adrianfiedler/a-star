@@ -7,7 +7,8 @@ let rows = 25,
   end,
   w,
   h,
-  path = [];
+  path = [],
+  noSolution = false;
 
 class Spot {
   constructor(i, j) {
@@ -18,15 +19,23 @@ class Spot {
     this.h = 0;
     this.neighbors = [];
     this.previous = undefined;
+    this.wall = false;
+
+    if (random(1) < 0.1) {
+      this.wall = true;
+    }
   }
 
-  show(colo) {
+  show (colo) {
     fill(colo);
+    if (this.wall) {
+      fill(0);
+    }
     noStroke();
     rect(this.i * w, this.j * h, w - 1, h - 1);
   }
 
-  addNeighbors(grid) {
+  addNeighbors (grid) {
     let i = this.i;
     let j = this.j;
     if (i < cols - 1) {
@@ -44,7 +53,7 @@ class Spot {
   }
 }
 
-function setup() {
+function setup () {
   createCanvas(800, 800);
   console.log("A*");
 
@@ -69,12 +78,14 @@ function setup() {
 
   start = grid[0][0];
   end = grid[cols - 1][rows - 1];
+  start.wall = false;
+  end.wall = false;
   openSet.push(start);
 
   console.log(grid);
 }
 
-function draw() {
+function draw () {
   if (openSet.length > 0) {
     let winner = 0;
     for (let i = 0; i < openSet.length; i++) {
@@ -96,7 +107,7 @@ function draw() {
     let neighbors = current.neighbors;
     for (let i = 0; i < neighbors.length; i++) {
       let neighbor = neighbors[i];
-      if (!closedSet.includes(neighbor)) {
+      if (!closedSet.includes(neighbor) && !neighbor.wall) {
         let tempG = current.g + 1;
         if (openSet.includes(neighbor)) {
           if (tempG < neighbor.g) {
@@ -116,6 +127,9 @@ function draw() {
     // we can keep going
   } else {
     // no solution
+    console.log('no solution');
+    noSolution = true;
+    noLoop();
   }
 
   background(0);
@@ -134,25 +148,28 @@ function draw() {
   }
 
   // Find the path
-  path = [];
-  let temp = current;
-  path.push(temp);
-  while (temp.previous) {
-    path.push(temp.previous);
-    temp = temp.previous;
+  if (!noSolution) {
+    path = [];
+    let temp = current;
+    path.push(temp);
+    while (temp.previous) {
+      path.push(temp.previous);
+      temp = temp.previous;
+    }
   }
+
   for (let i = 0; i < path.length; i++) {
     path[i].show(color(0, 0, 255));
   }
 }
 
-function heuristic(a, b) {
+function heuristic (a, b) {
   // let d = dist(a.i, a.j, b.i, b.j);
   let d = abs(a.i - b.i) + abs(a.j - b.j);
   return d;
 }
 
-function removeFromArray(arr, elt) {
+function removeFromArray (arr, elt) {
   for (let i = arr.length - 1; i >= 0; i--) {
     if (arr[i] == elt) {
       arr.splice(i, 1);
