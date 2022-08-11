@@ -125,18 +125,24 @@ function draw() {
       let neighbor = neighbors[i];
       if (!closedSet.includes(neighbor) && !neighbor.wall) {
         let tempG = current.g + 1;
+
+        var newPath = false;
         if (openSet.includes(neighbor)) {
           if (tempG < neighbor.g) {
             neighbor.g = tempG;
+            newPath = true;
           }
         } else {
           neighbor.g = tempG;
+          newPath = true;
           openSet.push(neighbor);
         }
 
-        neighbor.h = heuristic(neighbor, end);
-        neighbor.f = neighbor.g + neighbor.h;
-        neighbor.previous = current;
+        if (newPath) {
+          neighbor.h = heuristic(neighbor, end);
+          neighbor.f = neighbor.g + neighbor.h;
+          neighbor.previous = current;
+        }
       }
       neighbor.g = current.g + 1;
     }
@@ -178,8 +184,8 @@ function draw() {
 }
 
 function heuristic(a, b) {
-  // let d = dist(a.i, a.j, b.i, b.j); 
-  let d = abs(a.i - b.i) + abs(a.j - b.j); // manhattan distance
+  let d = dist(a.i, a.j, b.i, b.j); // euklidian distance
+  // let d = abs(a.i - b.i) + abs(a.j - b.j); // manhattan distance
   return d;
 }
 
